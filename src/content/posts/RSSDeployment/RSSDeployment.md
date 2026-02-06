@@ -110,7 +110,7 @@ Commit 之后 Space 将自动启动容器。
 
 :::info
 Direct Connection 模式仅支持`ipv6`。如果想要兼容`ipv4`，请使用 Session Pool 模式。
-：：：
+:::
 
 # FreshRSS
 同样在 Space 中创建`Dockerfile`:
