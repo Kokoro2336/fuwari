@@ -22,22 +22,23 @@ draft: false
 * 具有*一定计算机技术基础*，且愿意花时间折腾和~~使劲薅羊毛~~的人
 
 ## 为什么要自建？
-许多网站都会提供RSS订阅服务(例如Github，Twitter等)。对于这些网站，我们可以在客户端上进行直接订阅。
+许多网站都会提供RSS订阅服务(例如 Github，Twitter 等)。对于这些网站，我们可以在客户端上进行直接订阅。
 
 但也有很多网站为了将流量锁在APP里，选择掐断了这项服务(尤其是国内的知乎等)。
-对于这些没有RSS订阅服务的网站，我们只能通过RSSHub这样的中间件去爬取它的内容，在生成RSS订阅链接。
+对于这些没有RSS订阅服务的网站，我们只能通过 RSSHub 这样的中间件去爬取它的内容，在生成 RSS 订阅链接。
 
-RSSHub本身是有公共实例的，但公共实例使用人数多，带宽容易被挤占，导致响应速度不稳定。
+RSSHub 本身是有公共实例的，但公共实例使用人数多，带宽容易被挤占，导致响应速度不稳定。
 
 幸运的是，RSSHub是开源的，因此我们可以通过自部署来建立自己的RSS订阅云服务。
 
 # 方案
 经过尝试，我找到了可靠的方案：
-* [RSSHub](https://github.com/DIYgod/RSSHub): [Hugging Face](https://huggingface.co) Docker Container
-* FreshRSS: Hugging Face Docker Container
+* [RSSHub](https://github.com/DIYgod/RSSHub): [Hugging Face](https://huggingface.co) Space
+* FreshRSS: Hugging Face Space
 * PostgreSQL: [Supabase](https://supabase.com) Free Plan
 * Crontab: [Cron Job](cron-job.org)
 * Reader: [Fluent Reader](https://github.com/yang991178/fluent-reader)
+* Subsciption: [RSSHub Radar](https://github.com/DIYgod/RSSHub-Radar)
 
 # RSSHub
 RSSHub 本质上是一个**爬虫中间件**，用来爬取目标网页上的内容，并将其制作成 RSS 订阅链接，订阅者通过它的**路由**获取到XML形式的内容。
@@ -89,12 +90,14 @@ Commit 之后 Space 将自动启动容器。
 
 例如想要获取知乎的内容可以在 Space 项目的`Variable & Secrets`中添加环境变量`ZHIHU_COOKIES`。其它网站需要的环境变量可以自行研究或通过 [DeepWiki](https://deepwiki.com) 等工具来在项目中查询。
 
-:::important
-为了保持 Cookie 有效，最好让 Cookie 对应的账号在相应网站中保持登录状态。
-:::
+> [!IMPORTANT]
+> 为了保持 Cookie 有效，最好让 Cookie 对应的账号在相应网站中保持登录状态。
 
 ### 刷新频率
 通过设置`CACHE_EXPIRE`和`CACHE_CONTENT_EXPIRE`变量，控制 RSSHub 定期抓取的频率。
+
+### 访问限制
+你还可以通过设置`ACCESS_KEY`来限制访客。
 
 # PostgreSQL
 > [!NOTE]
@@ -108,9 +111,8 @@ Commit 之后 Space 将自动启动容器。
 
 将图中的 `params` 对应到接下来 FreshRSS 的环境变量当中即可。
 
-:::important
-Direct Connection 模式仅支持`ipv6`。如果想要兼容`ipv4`，请使用 Session Pool 模式。
-:::
+> [!IMPORTANT]
+> Direct Connection 模式仅支持`ipv6`。如果想要兼容`ipv4`，请使用 Session Pool 模式。
 
 # FreshRSS
 同样在 Space 中创建`Dockerfile`:
@@ -132,8 +134,14 @@ ENV LISTEN=7860
 --db-user=<user_in_db> 
 --db-password=<supabase_pwd> 
 --db-base=<base_in_db> 
---api-enabled # fixxed, no params
---auth-type=form  # fixxed, don't change
+
+# Enable Google Reader API, crucial
+--api-enabled 
+
+# CAUTION!
+# This param specifies the authorization method.
+# Setting it as none means that FreshRSS allow anonymous access, which can incur a safety problem.
+--auth-type=form  
 
 # CAUTION!
 # This param specifies the prefix of the tables' name.
@@ -179,11 +187,10 @@ TZ=Asia/Shanghai
 10.0.0.0/8
 ```
 
-:::warning
-注意到，`FRESHRSS_USER`中有一个用户密码和一个**API密码**，它们分别用于登录 FreshRSS 和访问 FreshRSS 的 API 。
+> [!WARNING]
+> 注意到，`FRESHRSS_USER`中有一个用户密码和一个**API密码**，它们分别用于登录 FreshRSS 和访问 FreshRSS 的 API 。
 我们将使用 API 的密码在 Reader 进行订阅。
 **并且需要注意的是，FreshRSS 的 API 接口并不在`/`下，而是位于`/api/greader.php`下**。
-:::
 
 # Cron Job
 Hugging Face 和 Supabase 都会在无请求一段时间之后休眠，因此我们需要使用 Cron Job 定时触发服务器。
@@ -206,6 +213,26 @@ Hugging Face 和 Supabase 都会在无请求一段时间之后休眠，因此我
 ![Connect to FreshRSS](connect_to_freshrss.jpg)
 
 输入刚才的 API 密码即可获取完整订阅。
+
+# Quick Subsciption via RSS Radar
+FreshRSS 提供了统一获取和组织订阅的功能，但由于`--auth-type`设置了登录验证，每次我们想要添加新的订阅都需要重新登录 FreshRSS 。
+
+这很麻烦。所幸 RSSHub 的作者 DIYGod 大神提供了一个浏览器插件：**RSS Radar**，方便我们在浏览网页时快速查看是否有可用路由并添加到我们的订阅服务中。它可以在你所使用的任何主流浏览器的插件市场上下载到。
+
+下载完毕之后打开它的设置：
+
+![Radar Settings](radar_settings.png)
+
+填写你的 RSSHub 和 订阅服务的公共域名，如有需要添加`ACCESS_KEY`至`Access Key`一栏。
+
+> [!NOTE]
+> 这里 FreshRSS 并不需要添加登录的用户名和密码，因为 RSSHub Radar 通过读取**浏览器中的`Session`或者`Cookie`来确认你是否在浏览器中登录过这个站点的 FressRSS 服务**。所以你需要做的，就是在浏览器里**登录过一次 FreshRSS 即可**。
+
+在设置好后，就可以在打开某个内容网站时看到是否有可用的订阅了:
+
+![Available Subsciptions](available_subsciptions.png)
+
+右侧点击对应 FreshRSS 的图标，就可以快速跳转到 FreshRSS 内部的订阅页面。
 
 # 后记
 看着这一套系统能稳定搭起来还是非常舒服的。顺便学了一些部署服务器有关的东西。
