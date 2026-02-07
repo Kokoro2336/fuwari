@@ -1,6 +1,7 @@
 ---
 title: 零元购自建RSS订阅服务
 published: 2026-02-06
+updated: 2026-02-07
 description: 如何白嫖免费的云主机构建一套RSS订阅系统
 tags: [RSS, 自建, CN]
 category: Tech
@@ -96,9 +97,8 @@ Commit 之后 Space 将自动启动容器。
 通过设置`CACHE_EXPIRE`和`CACHE_CONTENT_EXPIRE`变量，控制 RSSHub 定期抓取的频率。
 
 # PostgreSQL
-:::info
-前面说到 HF Space 服务器的强悍配置。但它也有限制：**无法数据持久化**。这意味着单靠 FressRSS ，我们无法将**缓存的数据持久化存储到硬盘里**，一旦容器重启，所有的数据都会被销毁，FressRSS 不得不重新从 RSSHub 获取全部 Feeds。这就是为什么我们会需要一个 External 的 PostgreSQL 数据库。
-:::
+> [!NOTE]
+> 前面说到 HF Space 服务器的强悍配置。但它也有限制：**无法数据持久化**。这意味着单靠 FressRSS ，我们无法将**缓存的数据持久化存储到硬盘里**，一旦容器重启，所有的数据都会被销毁，FressRSS 不得不重新从 RSSHub 获取全部 Feeds。这就是为什么我们会需要一个 External 的 PostgreSQL 数据库。
 
 ~~Zeabur 可以部署 PG ，但极其不稳定，其它 Serverless 也是直接卡爆~~。我选择了连接稳定的 Supabase 。
 
@@ -108,7 +108,7 @@ Commit 之后 Space 将自动启动容器。
 
 将图中的 `params` 对应到接下来 FreshRSS 的环境变量当中即可。
 
-:::tip
+:::important
 Direct Connection 模式仅支持`ipv6`。如果想要兼容`ipv4`，请使用 Session Pool 模式。
 :::
 
