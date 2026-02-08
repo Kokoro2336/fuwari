@@ -1,7 +1,7 @@
 ---
 title: 零元购自建RSS订阅服务
 published: 2026-02-06
-updated: 2026-02-07
+updated: 2026-02-08
 description: 如何白嫖免费的云主机构建一套RSS订阅系统
 tags: [RSS, 自建, CN]
 category: Tech
@@ -197,6 +197,9 @@ Hugging Face 和 Supabase 都会在无请求一段时间之后休眠，因此我
 
 在 cron-job.org 上，只需要为 FreshRSS 添加 Cron Job ，因为FreshRSS 会去请求(触发) RSSHub 和 Supabase。建议设置为*与 FreshRSS 定时更新的频率一致*。
 
+> [!TIP]
+> 由于在登陆过 FreshRSS 之后，当你再次访问 FreshRSS 的`/`路由时， FreshRSS 将会重定向至登录后的界面返回 302 ，导致 Cron Job 报告失败。所以最好把 Cron Job 的 URL 设置为 API 的访问路由，即`domain + /api/greader.php`。
+
 # RSS Reader
 ## Selection
 本人筛选出了几款能用的 RSS Reader :
@@ -214,10 +217,10 @@ Hugging Face 和 Supabase 都会在无请求一段时间之后休眠，因此我
 
 输入刚才的 API 密码即可获取完整订阅。
 
-# Quick Subsciption via RSS Radar
+# Quick Subsciption via RSSHub Radar
 FreshRSS 提供了统一获取和组织订阅的功能，但由于`--auth-type`设置了登录验证，每次我们想要添加新的订阅都需要重新登录 FreshRSS 。
 
-这很麻烦。所幸 RSSHub 的作者 DIYGod 大神提供了一个浏览器插件：**RSS Radar**，方便我们在浏览网页时快速查看是否有可用路由并添加到我们的订阅服务中。它可以在你所使用的任何主流浏览器的插件市场上下载到。
+这很麻烦。所幸 RSSHub 的作者 DIYGod 大神提供了一个浏览器插件：**RSSHub Radar**，方便我们在浏览网页时快速查看是否有可用路由并添加到我们的订阅服务中。它可以在你所使用的任何主流浏览器的插件市场上下载到。
 
 下载完毕之后打开它的设置：
 
