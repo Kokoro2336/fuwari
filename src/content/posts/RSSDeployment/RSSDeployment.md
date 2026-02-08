@@ -101,7 +101,7 @@ Commit 之后 Space 将自动启动容器。
 
 # PostgreSQL
 > [!NOTE]
-> 前面说到 HF Space 服务器的强悍配置。但它也有限制：**无法数据持久化**。这意味着单靠 FressRSS ，我们无法将**缓存的数据持久化存储到硬盘里**，一旦容器重启，所有的数据都会被销毁，FressRSS 不得不重新从 RSSHub 获取全部 Feeds。这就是为什么我们会需要一个 External 的 PostgreSQL 数据库。
+> 前面说到 HF Space 服务器的强悍配置。但它也有限制：**无法数据持久化**。这意味着单靠 FreshRSS ，我们无法将**缓存的数据持久化存储到硬盘里**，一旦容器重启，所有的数据都会被销毁，FreshRSS 不得不重新从 RSSHub 获取全部 Feeds。这就是为什么我们会需要一个 External 的 PostgreSQL 数据库。
 
 ~~Zeabur 可以部署 PG ，但极其不稳定，其它 Serverless 也是直接卡爆~~。我选择了连接稳定的 Supabase 。
 
@@ -135,17 +135,17 @@ ENV LISTEN=7860
 --db-password=<supabase_pwd> 
 --db-base=<base_in_db> 
 
-# Enable Google Reader API, crucial
+# Crucial: Enable Google Reader API
 --api-enabled 
 
 # CAUTION!
 # This param specifies the authorization method.
-# Setting it as none means that FreshRSS allow anonymous access, which can incur a safety problem.
+# Setting it to none means that FreshRSS allows anonymous access, which can incur a safety problem.
 --auth-type=form  
 
 # CAUTION!
 # This param specifies the prefix of the tables' name.
-# If you start the server twice, and you use different prefixes, FressRSS will not be able to find the tables created at the first time.
+# If you start the server twice, and you use different prefixes, FreshRSS will not be able to find the tables created at the first time.
 # So keep it consistent.
 # By the way, If you want to specify a prefix, use --db-prefix=<prefix>
 # If not, use --db-prefix, without the trailing "=".
@@ -226,7 +226,7 @@ FreshRSS 提供了统一获取和组织订阅的功能，但由于`--auth-type`�
 填写你的 RSSHub 和 订阅服务的公共域名，如有需要添加`ACCESS_KEY`至`Access Key`一栏。
 
 > [!NOTE]
-> 这里 FreshRSS 并不需要添加登录的用户名和密码，因为 RSSHub Radar 通过读取**浏览器中的`Session`或者`Cookie`来确认你是否在浏览器中登录过这个站点的 FressRSS 服务**。所以你需要做的，就是在浏览器里**登录过一次 FreshRSS 即可**。
+> 这里 FreshRSS 并不需要添加登录的用户名和密码，因为 RSSHub Radar 通过读取**浏览器中的`Session`或者`Cookie`来确认你是否在浏览器中登录过这个站点的 FreshRSS 服务**。所以你需要做的，就是在浏览器里**登录过一次 FreshRSS 即可**。
 
 在设置好后，就可以在打开某个内容网站时看到是否有可用的订阅了:
 
